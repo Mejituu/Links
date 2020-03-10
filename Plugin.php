@@ -4,9 +4,12 @@
  * 
  * @package Links
  * @author 懵仙兔兔
- * @version 1.2.1
+ * @version 1.2.2
  * @dependence 14.10.10-*
  * @link https://2dph.com
+ * 
+ * version 1.2.2 at 2020-03-11 by 懵仙兔兔
+ * 修复一个小BUG
  * 
  * version 1.2.1 at 2020-03-03 by 懵仙兔兔
  * 修复邮箱头像解析问题
@@ -389,3 +392,5 @@ class Links_Plugin implements Typecho_Plugin_Interface
         }
     }
 }
+
+/** Links by 懵仙兔兔 */
