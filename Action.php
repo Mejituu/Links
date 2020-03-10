@@ -34,7 +34,7 @@ class Links_Action extends Typecho_Widget implements Widget_Interface_Do
 		$link = array(
 			'name' => "懵仙兔兔",
 			'url' => "https://2dph.com", 
-			'mail' => "acgm@qq.com",
+			'email' => "acgm@qq.com",
 			'image' => "https://2dph.com/logo.png", 
 			'description' => "永远相信，美好的事情即将发生——懵仙兔兔", 
 		);
@@ -161,3 +161,4 @@ class Links_Action extends Typecho_Widget implements Widget_Interface_Do
 		$this->response->redirect($this->options->adminUrl);
 	}
 }
+/** Links by 懵仙兔兔 */
