@@ -1,4 +1,5 @@
 <?php
+
 /** 初始化组件 */
 Typecho_Widget::widget('Widget_Init');
 
@@ -25,16 +26,16 @@ include 'menu.php';
                 <div class="col-mb-12">
                     <ul class="typecho-option-tabs clearfix">
                         <li class="current"><a href="<?php $options->adminUrl('extending.php?panel=Links/manage-links.php'); ?>"><?php _e('友情链接'); ?></a></li>
-						<li><a href=<?php $options->index('/action/links-edit?do=addMejituu'); ?> title="如果你喜欢，可以点击快速添加懵仙兔兔的博客。"><?php _e('添加懵仙兔兔'); ?></a></li>
+                        <li><a href=<?php $options->index('/action/links-edit?do=addMejituu'); ?> title="如果你喜欢，可以点击快速添加懵仙兔兔的博客。"><?php _e('添加懵仙兔兔'); ?></a></li>
                         <li><a href="<?php $options->adminUrl('options-plugin.php?config=Links'); ?>"><?php _e('设置'); ?></a></li>
                         <li><a href="https://2dph.com/archives/typecho-links-help.html" title="查看友情链接使用帮助" target="_blank"><?php _e('帮助'); ?></a></li>
                     </ul>
                 </div>
 
-                <div class="col-mb-12 col-tb-8" role="main">                  
+                <div class="col-mb-12 col-tb-8" role="main">
                     <?php
-						$prefix = $db->getPrefix();
-						$links = $db->fetchAll($db->select()->from($prefix.'links')->order($prefix.'links.order', Typecho_Db::SORT_ASC));
+                        $prefix = $db->getPrefix();
+                        $links = $db->fetchAll($db->select()->from($prefix.'links')->order($prefix.'links.order', Typecho_Db::SORT_ASC));
                     ?>
                     <form method="post" name="manage_categories" class="operate-form">
                     <div class="typecho-list-operate clearfix">
@@ -55,46 +56,46 @@ include 'menu.php';
                         <table class="typecho-list-table">
                             <colgroup>
                                 <col width="15"/>
-								<col width="25%"/>
-								<col width=""/>
-								<col width="15%"/>
-								<col width="10%"/>
-								<col width="12%"/>
+                                <col width="25%"/>
+                                <col width=""/>
+                                <col width="15%"/>
+                                <col width="10%"/>
+                                <col width="12%"/>
                             </colgroup>
                             <thead>
                                 <tr>
                                     <th> </th>
-									<th><?php _e('友链名称'); ?></th>
-									<th><?php _e('友链地址'); ?></th>
-									<th><?php _e('分类'); ?></th>
-									<th><?php _e('图片'); ?></th>
-									<th><?php _e('状态'); ?></th>
+                                    <th><?php _e('友链名称'); ?></th>
+                                    <th><?php _e('友链地址'); ?></th>
+                                    <th><?php _e('分类'); ?></th>
+                                    <th><?php _e('图片'); ?></th>
+                                    <th><?php _e('状态'); ?></th>
                                 </tr>
                             </thead>
                             <tbody>
-								<?php if (!empty($links)): $alt = 0;?>
-								<?php foreach ($links as $link): ?>
+                                <?php if (!empty($links)): $alt = 0;?>
+                                <?php foreach ($links as $link): ?>
                                 <tr id="lid-<?php echo $link['lid']; ?>">
                                     <td><input type="checkbox" value="<?php echo $link['lid']; ?>" name="lid[]"/></td>
-									<td><a href="<?php echo $request->makeUriByRequest('lid=' . $link['lid']); ?>" title="点击编辑"><?php echo $link['name']; ?></a>
-									<td><?php echo $link['url']; ?></td>
-									<td><?php echo $link['sort']; ?></td>
-									<td><?php
-										if ($link['image']) {
-											echo '<a href="'.$link['image'].'" title="点击放大" target="_blank"><img class="avatar" src="'.$link['image'].'" alt="'.$link['name'].'" width="32" height="32"/></a>';
-										} else {
-											$options = Typecho_Widget::widget('Widget_Options');
-											$nopic_url = Typecho_Common::url('/usr/plugins/Links/nopic.jpg', $options->siteUrl);
-											echo '<img class="avatar" src="'.$nopic_url.'" alt="NOPIC" width="32" height="32"/>';
-										}
-									?></td>
-									<td><?php
-										if ($link['state'] == 1) {
-											echo '正常';
-										} elseif ($link['state'] == 0) {
-											echo '禁用';
-										}
-									?></td>
+                                    <td><a href="<?php echo $request->makeUriByRequest('lid=' . $link['lid']); ?>" title="点击编辑"><?php echo $link['name']; ?></a>
+                                    <td><?php echo $link['url']; ?></td>
+                                    <td><?php echo $link['sort']; ?></td>
+                                    <td><?php
+                                        if ($link['image']) {
+                                            echo '<a href="'.$link['image'].'" title="点击放大" target="_blank"><img class="avatar" src="'.$link['image'].'" alt="'.$link['name'].'" width="32" height="32"/></a>';
+                                        } else {
+                                            $options = Typecho_Widget::widget('Widget_Options');
+                                            $nopic_url = Typecho_Common::url('/usr/plugins/Links/nopic.jpg', $options->siteUrl);
+                                            echo '<img class="avatar" src="'.$nopic_url.'" alt="NOPIC" width="32" height="32"/>';
+                                        }
+                                    ?></td>
+                                    <td><?php
+                                        if ($link['state'] == 1) {
+                                            echo '正常';
+                                        } elseif ($link['state'] == 0) {
+                                            echo '禁用';
+                                        }
+                                    ?></td>
                                 </tr>
                                 <?php endforeach; ?>
                                 <?php else: ?>
@@ -106,7 +107,7 @@ include 'menu.php';
                         </table>
                     </div>
                     </form>
-				</div>
+                </div>
                 <div class="col-mb-12 col-tb-4" role="form">
                     <?php Links_Plugin::form()->render(); ?>
                 </div>
@@ -119,19 +120,20 @@ include 'copyright.php';
 include 'common-js.php';
 ?>
 
-<script> 
+<script>
 $('input[name="email"]').blur(function() {
     var _email = $(this).val();
     var _image = $('input[name="image"]').val();
     if (_email != '' && _image == '') {
-        var k="<?php Helper::options()->pluginUrl(); ?>Links/api/email-logo.php?type=json&email="+$(this).val();
-        $.get(k,function(result){var k=jQuery.parseJSON(result).url;
-        $('input[name="image"]').val(k);
+        var k="<?php Helper::options()->pluginUrl(); ?>Links/api/email-logo.php?type=json&email=" + $(this).val();
+        $.get(k,function (result) {
+            var k = jQuery.parseJSON(result).url;
+            $('input[name="image"]').val(k);
         });
     }
     return false;
 });
-</script> 
+</script>
 <script type="text/javascript">
 (function () {
     $(document).ready(function () {
@@ -143,7 +145,7 @@ $('input[name="email"]').blur(function() {
                     ids.push($(this).val());
                 });
 
-                $.post('<?php $options->index('/action/links-edit?do=sort'); ?>', 
+                $.post('<?php $options->index('/action/links-edit?do=sort'); ?>',
                     $.param({lid : ids}));
 
                 $('tr', table).each(function (i) {
