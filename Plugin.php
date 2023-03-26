@@ -4,7 +4,7 @@
  * 
  * @package Links
  * @author 懵仙兔兔
- * @version 1.2.2
+ * @version 1.2.3
  * @dependence 14.10.10-*
  * @link https://2dph.com
  * 
@@ -110,9 +110,9 @@ class Links_Plugin implements Typecho_Plugin_Interface
                 <p>作者：懵仙兔兔</p>
                 <p>友情链接插件更新下载地址：</p><a href="https://2dph.com/archives/typecho-links.html">https://2dph.com/archives/typecho-links.html</a>
                 <p>友情链接插件使用帮助：</p><a href="https://2dph.com/archives/typecho-links-help.html">https://2dph.com/archives/typecho-links-help.html</a>
-                <p>本插件推荐使用主题Violet：</p><a href="https://qqdie.com/archives/violet-typecho-themes.html">https://qqdie.com/archives/violet-typecho-themes.html</a>
             </div>
         </center>
+        <style>input.text,.typecho-option-submit{display:none}</style>
         </div>'));
         $form->addInput($tixing);
         
