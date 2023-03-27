@@ -5,9 +5,18 @@
  * 
  * @package Links
  * @author 懵仙兔兔
- * @version 1.2.3
+ * @version 1.2.5
  * @dependence 14.10.10-*
  * @link https://2dph.com
+ * 
+ * version 1.2.5 at 2023-03-27 by 懵仙兔兔
+ * 友链添加 noopener 外链属性
+ * 内置友链邮箱解析头像链接 api 接口调整为仅内部调用
+ * Action 和内置友链邮箱解析头像链接 api 接口使用加盐地址
+ * 文本字段入库过滤 XSS
+ * 增加图片尺寸参数支持
+ * 增加规则和默认图片尺寸设置选项
+ * 修复历史遗留问题更新 lid 导致报错
  * 
  * version 1.2.3 at 2023-03-26 by 懵仙兔兔
  * 修复没有一条友链时，Typecho 1.2 友链设置界面报错问题（虽然报错不影响功能）
@@ -33,7 +42,7 @@
  * version 1.1.3 at 2020-02-08 by 懵仙兔兔
  * 修复已存在表激活失败、表检测失败
  * 
- * version 1.1.2 at notime
+ * version 1.1.2 at 2019-08-26 by 泽泽社长
  * 修复越权漏洞
  * 
  * version 1.1.1 at 2014-12-14
@@ -76,17 +85,18 @@ class Links_Plugin implements Typecho_Plugin_Interface
      * 激活插件方法,如果激活失败,直接抛出异常
      * 
      * @access public
-     * @return void
+     * @return string
      * @throws Typecho_Plugin_Exception
      */
     public static function activate()
     {
         $info = Links_Plugin::linksInstall();
-        Helper::addPanel(3, 'Links/manage-links.php', '友情链接', '管理友情链接', 'administrator');
+        Helper::addPanel(3, 'Links/manage-links.php', _t('友情链接'), _t('管理友情链接'), 'administrator');
         Helper::addAction('links-edit', 'Links_Action');
         Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = array('Links_Plugin', 'parse');
         Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = array('Links_Plugin', 'parse');
         Typecho_Plugin::factory('Widget_Abstract_Comments')->contentEx = array('Links_Plugin', 'parse');
+        Typecho_Plugin::factory('Widget_Archive')->callLinks = array('Links_Plugin', 'output_str');
         return _t($info);
     }
 
@@ -113,17 +123,130 @@ class Links_Plugin implements Typecho_Plugin_Interface
      */
     public static function config(Typecho_Widget_Helper_Form $form)
     {
-        $tixing = new Typecho_Widget_Helper_Form_Element_Text('Mejituu', null, null, _t('【管理】→【友情链接】进入操作页面'), _t('<div class="Mejituu"><br>
-        <center>
-            <div>
-                <p>作者：懵仙兔兔</p>
-                <p>友情链接插件更新下载地址：</p><a href="https://2dph.com/archives/typecho-links.html">https://2dph.com/archives/typecho-links.html</a>
-                <p>友情链接插件使用帮助：</p><a href="https://2dph.com/archives/typecho-links-help.html">https://2dph.com/archives/typecho-links-help.html</a>
-            </div>
-        </center>
-        <style>input.text,.typecho-option-submit{display:none}</style>
-        </div>'));
-        $form->addInput($tixing);
+        echo '
+<ul class="typecho-option">
+    <li>
+        <label class="typecho-label">管理】→【友情链接】进入操作页面</label>
+        <div class="Mejituu"><br>
+            <center>
+                <div>
+                    <p>作者：懵仙兔兔</p>
+                    <p>友情链接插件更新下载地址：</p><a href="https://2dph.com/archives/typecho-links.html"
+                        target="_blank">https://2dph.com/archives/typecho-links.html</a>
+                    <p>友情链接插件使用帮助：</p><a href="https://2dph.com/archives/typecho-links-help.html"
+                        target="_blank">https://2dph.com/archives/typecho-links-help.html</a>
+                </div>
+            </center>
+        </div>
+    </li>
+</ul>
+<style type="text/css">
+    table {
+        background: #FFF;
+        border: 2px solid #e3e3e3;
+        color: #666;
+        font-size: .92857em;
+        width: 452px;
+    }
+
+    th {
+        border: 2px solid #e3e3e3;
+        padding: 5px;
+    }
+
+    table td {
+        border-top: 1px solid #e3e3e3;
+        padding: 3px;
+        text-align: center;
+        border-right: 2px solid #e3e3e3;
+    }
+
+    .field {
+        color: #467B96;
+        font-weight: bold;
+    }
+</style>
+<center>
+    <table>
+        <colgroup>
+            <col width="30%" />
+            <col width="70%" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th>' . _t('字段') . '</th>
+                <th>' . _t('对应数据') . '</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="field">{url}</td>
+                <td>' . _t('友链地址') . '</td>
+            </tr>
+            <tr>
+                <td class="field">{title}<br />{description}</td>
+                <td>' . _t('友链描述') . '</td>
+            </tr>
+            <tr>
+                <td class="field">{name}</td>
+                <td>' . _t('友链名称') . '</td>
+            </tr>
+            <tr>
+                <td class="field">{image}</td>
+                <td>' . _t('友链图片') . '</td>
+            </tr>
+            <tr>
+                <td class="field">{size}</td>
+                <td>' . _t('图片尺寸') . '</td>
+            </tr>
+            <tr>
+                <td class="field">{sort}</td>
+                <td>' . _t('友链分类') . '</td>
+            </tr>
+            <tr>
+                <td class="field">{user}</td>
+                <td>' . _t('自定义数据') . '</td>
+            </tr>
+            <tr>
+                <td class="field">{lid}</td>
+                <td>' . _t('链接的数据表ID') . '</td>
+            </tr>
+        </tbody>
+    </table>
+</center>';
+        $pattern_text = new Typecho_Widget_Helper_Form_Element_Textarea(
+            'pattern_text',
+            null,
+            '<li><a href="{url}" title="{title}" target="_blank" rel="noopener">{name}</a></li>',
+            _t('SHOW_TEXT模式源码规则'),
+            _t('使用SHOW_TEXT(仅文字)模式输出时的源码，可按上表规则替换其中字段')
+        );
+        $form->addInput($pattern_text);
+        $pattern_img = new Typecho_Widget_Helper_Form_Element_Textarea(
+            'pattern_img',
+            null,
+            '<li><a href="{url}" title="{title}" target="_blank" rel="noopener"><img src="{image}" alt="{name}" width="{size}" height="{size}" /></a></li>',
+            _t('SHOW_IMG模式源码规则'),
+            _t('使用SHOW_IMG(仅图片)模式输出时的源码，可按上表规则替换其中字段')
+        );
+        $form->addInput($pattern_img);
+        $pattern_mix = new Typecho_Widget_Helper_Form_Element_Textarea(
+            'pattern_mix',
+            null,
+            '<li><a href="{url}" title="{title}" target="_blank" rel="noopener"><img src="{image}" alt="{name}" width="{size}" height="{size}" /><span>{name}</span></a></li>',
+            _t('SHOW_MIX模式源码规则'),
+            _t('使用SHOW_MIX(图文混合)模式输出时的源码，可按上表规则替换其中字段')
+        );
+        $form->addInput($pattern_mix);
+        $dsize = new Typecho_Widget_Helper_Form_Element_Text(
+            'dsize',
+            NULL,
+            '32',
+            _t('默认输出图片尺寸'),
+            _t('调用时如果未指定尺寸参数默认输出的图片大小(单位px不用填写)')
+        );
+        $dsize->input->setAttribute('class', 'w-10');
+        $form->addInput($dsize->addRule('isInteger', _t('请填写整数数字')));
     }
 
     /**
@@ -154,7 +277,7 @@ class Links_Plugin implements Typecho_Plugin_Interface
                     $installDb->query($script, Typecho_Db::WRITE);
                 }
             }
-            return '建立友情链接数据表，插件启用成功';
+            return _t('建立友情链接数据表，插件启用成功');
         } catch (Typecho_Db_Exception $e) {
             $code = $e->getCode();
             if (('Mysql' == $type && (1050 == $code || '42S01' == $code)) ||
@@ -163,7 +286,7 @@ class Links_Plugin implements Typecho_Plugin_Interface
                 try {
                     $script = 'SELECT `lid`, `name`, `url`, `sort`, `email`, `image`, `description`, `user`, `state`, `order` from `' . $prefix . 'links`';
                     $installDb->query($script, Typecho_Db::READ);
-                    return '检测到友情链接数据表，友情链接插件启用成功';
+                    return _t('检测到友情链接数据表，友情链接插件启用成功');
                 } catch (Typecho_Db_Exception $e) {
                     $code = $e->getCode();
                     if (('Mysql' == $type && (1054 == $code || '42S22' == $code)) ||
@@ -171,10 +294,10 @@ class Links_Plugin implements Typecho_Plugin_Interface
                     ) {
                         return Links_Plugin::linksUpdate($installDb, $type, $prefix);
                     }
-                    throw new Typecho_Plugin_Exception('数据表检测失败，友情链接插件启用失败。错误号：' . $code);
+                    throw new Typecho_Plugin_Exception(_t('数据表检测失败，友情链接插件启用失败。错误号：') . $code);
                 }
             } else {
-                throw new Typecho_Plugin_Exception('数据表建立失败，友情链接插件启用失败。错误号：' . $code);
+                throw new Typecho_Plugin_Exception(_t('数据表建立失败，友情链接插件启用失败。错误号：') . $code);
             }
         }
     }
@@ -192,13 +315,13 @@ class Links_Plugin implements Typecho_Plugin_Interface
                     $installDb->query($script, Typecho_Db::WRITE);
                 }
             }
-            return '检测到旧版本友情链接数据表，升级成功';
+            return _t('检测到旧版本友情链接数据表，升级成功');
         } catch (Typecho_Db_Exception $e) {
             $code = $e->getCode();
             if (('Mysql' == $type && (1060 == $code || '42S21' == $code))) {
-                return '友情链接数据表已经存在，插件启用成功';
+                return _t('友情链接数据表已经存在，插件启用成功');
             }
-            throw new Typecho_Plugin_Exception('友情链接插件启用失败。错误号：' . $code);
+            throw new Typecho_Plugin_Exception(_t('友情链接插件启用失败。错误号：') . $code);
         }
     }
 
@@ -207,7 +330,7 @@ class Links_Plugin implements Typecho_Plugin_Interface
         /** 构建表格 */
         $options = Typecho_Widget::widget('Widget_Options');
         $form = new Typecho_Widget_Helper_Form(
-            Typecho_Common::url('/action/links-edit', $options->index),
+            Helper::security()->getIndex('/action/links-edit'),
             Typecho_Widget_Helper_Form::POST_METHOD
         );
 
@@ -322,27 +445,32 @@ class Links_Plugin implements Typecho_Plugin_Interface
     /**
      * 控制输出格式
      */
-    public static function output_str($pattern = null, $links_num = 0, $sort = null)
+    public static function output_str($widget, array $params)
     {
         $options = Typecho_Widget::widget('Widget_Options');
+        $settings = $options->plugin('Links');
         if (!isset($options->plugins['activated']['Links'])) {
-            return '友情链接插件未激活';
+            return _t('友情链接插件未激活');
         }
-        if (!isset($pattern) || $pattern == "" || $pattern == null || $pattern == "SHOW_TEXT") {
-            $pattern = "<li><a href=\"{url}\" title=\"{title}\" target=\"_blank\">{name}</a></li>\n";
-        } elseif ($pattern == "SHOW_IMG") {
-            $pattern = "<li><a href=\"{url}\" title=\"{title}\" target=\"_blank\"><img src=\"{image}\" alt=\"{name}\" /></a></li>\n";
-        } elseif ($pattern == "SHOW_MIX") {
-            $pattern = "<li><a href=\"{url}\" title=\"{title}\" target=\"_blank\"><img src=\"{image}\" alt=\"{name}\" /><span>{name}</span></a></li>\n";
+        //验证默认参数
+        $pattern = !empty($params[0]) && is_string($params[0]) ? $params[0] : 'SHOW_TEXT';
+        $links_num = !empty($params[1]) && is_numeric($params[1]) ? $params[1] : 0;
+        $sort = !empty($params[2]) && is_string($params[2]) ? $params[2] : null;
+        $size = !empty($params[3]) && is_numeric($params[3]) ? $params[3] : $settings->dsize;
+        $mode = isset($params[4]) ? $params[4] : 'FUNC';
+        if ($pattern == 'SHOW_TEXT') {
+            $pattern = $settings->pattern_text . "\n";
+        } elseif ($pattern == 'SHOW_IMG') {
+            $pattern = $settings->pattern_img . "\n";
+        } elseif ($pattern == 'SHOW_MIX') {
+            $pattern = $settings->pattern_mix . "\n";
+        } else {
+            $pattern = $settings->pattern_text . "\n";
         }
         $db = Typecho_Db::get();
         $prefix = $db->getPrefix();
-        $options = Typecho_Widget::widget('Widget_Options');
-        $nopic_url = Typecho_Common::url('/usr/plugins/Links/nopic.jpg', $options->siteUrl);
+        $nopic_url = Typecho_Common::url('usr/plugins/Links/nopic.png', $options->siteUrl);
         $sql = $db->select()->from($prefix . 'links');
-        if (!isset($sort) || $sort == "") {
-            $sort = null;
-        }
         if ($sort) {
             $sql = $sql->where('sort=?', $sort);
         }
@@ -357,24 +485,29 @@ class Links_Plugin implements Typecho_Plugin_Interface
             if ($link['image'] == null) {
                 $link['image'] = $nopic_url;
                 if ($link['email'] != null) {
-                    $link['image'] = 'https://gravatar.helingqi.com/wavatar/' . md5($link['email']) . '?d=mm';
+                    $link['image'] = 'https://gravatar.helingqi.com/wavatar/' . md5($link['email']) . '?s=' . $size . '&d=mm';
                 }
             }
             if ($link['state'] == 1) {
                 $str .= str_replace(
-                    array('{lid}', '{name}', '{url}', '{sort}', '{title}', '{description}', '{image}', '{user}'),
-                    array($link['lid'], $link['name'], $link['url'], $link['sort'], $link['description'], $link['description'], $link['image'], $link['user']),
+                    array('{lid}', '{name}', '{url}', '{sort}', '{title}', '{description}', '{image}', '{user}', '{size}'),
+                    array($link['lid'], $link['name'], $link['url'], $link['sort'], $link['description'], $link['description'], $link['image'], $link['user'], $size),
                     $pattern
                 );
             }
         }
-        return $str;
+
+        if ($mode == 'HTML') {
+            return $str;
+        } else {
+            echo $str;
+        }
     }
 
     //输出
-    public static function output($pattern = null, $links_num = 0, $sort = null)
+    public static function output($pattern = 'SHOW_TEXT', $links_num = 0, $sort = null, $size = 32)
     {
-        echo Links_Plugin::output_str($pattern, $links_num, $sort);
+        return Links_Plugin::output_str('', array($pattern, $links_num, $sort, $size));
     }
 
     /**
@@ -386,11 +519,7 @@ class Links_Plugin implements Typecho_Plugin_Interface
      */
     public static function parseCallback($matches)
     {
-        $db = Typecho_Db::get();
-        $pattern = $matches[3];
-        $links_num = $matches[1];
-        $sort = $matches[2];
-        return Links_Plugin::output_str($pattern, $links_num, $sort);
+        return Links_Plugin::output_str('', array($matches[4], $matches[1], $matches[2], $matches[3], 'HTML'));
     }
 
     public static function parse($text, $widget, $lastResult)
@@ -398,7 +527,7 @@ class Links_Plugin implements Typecho_Plugin_Interface
         $text = empty($lastResult) ? $text : $lastResult;
 
         if ($widget instanceof Widget_Archive || $widget instanceof Widget_Abstract_Comments) {
-            return preg_replace_callback("/<links\s*(\d*)\s*(\w*)>\s*(.*?)\s*<\/links>/is", array('Links_Plugin', 'parseCallback'), $text);
+            return preg_replace_callback("/<links\s*(\d*)\s*(\w*)\s*(\d*)>\s*(.*?)\s*<\/links>/is", array('Links_Plugin', 'parseCallback'), $text);
         } else {
             return $text;
         }

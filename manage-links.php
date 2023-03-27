@@ -26,7 +26,7 @@ include 'menu.php';
                 <div class="col-mb-12">
                     <ul class="typecho-option-tabs clearfix">
                         <li class="current"><a href="<?php $options->adminUrl('extending.php?panel=Links/manage-links.php'); ?>"><?php _e('友情链接'); ?></a></li>
-                        <li><a href=<?php $options->index('/action/links-edit?do=addMejituu'); ?> title="如果你喜欢，可以点击快速添加懵仙兔兔的博客。"><?php _e('添加懵仙兔兔'); ?></a></li>
+                        <li><a href=<?php $security->index('/action/links-edit?do=addMejituu'); ?> title="如果你喜欢，可以点击快速添加懵仙兔兔的博客。"><?php _e('添加懵仙兔兔'); ?></a></li>
                         <li><a href="<?php $options->adminUrl('options-plugin.php?config=Links'); ?>"><?php _e('设置'); ?></a></li>
                         <li><a href="https://2dph.com/archives/typecho-links-help.html" title="查看友情链接使用帮助" target="_blank"><?php _e('帮助'); ?></a></li>
                     </ul>
@@ -44,9 +44,9 @@ include 'menu.php';
                             <div class="btn-group btn-drop">
                                 <button class="btn dropdown-toggle btn-s" type="button"><i class="sr-only"><?php _e('操作'); ?></i><?php _e('选中项'); ?> <i class="i-caret-down"></i></button>
                                 <ul class="dropdown-menu">
-                                    <li><a lang="<?php _e('你确认要删除这些友链吗?'); ?>" href="<?php $options->index('/action/links-edit?do=delete'); ?>"><?php _e('删除'); ?></a></li>
-                                    <li><a lang="<?php _e('你确认要启用这些友链吗?'); ?>" href="<?php $options->index('/action/links-edit?do=enable'); ?>"><?php _e('启用'); ?></a></li>
-                                    <li><a lang="<?php _e('你确认要禁用这些友链吗?'); ?>" href="<?php $options->index('/action/links-edit?do=prohibit'); ?>"><?php _e('禁用'); ?></a></li>
+                                    <li><a lang="<?php _e('你确认要删除这些友链吗?'); ?>" href="<?php $security->index('/action/links-edit?do=delete'); ?>"><?php _e('删除'); ?></a></li>
+                                    <li><a lang="<?php _e('你确认要启用这些友链吗?'); ?>" href="<?php $security->index('/action/links-edit?do=enable'); ?>"><?php _e('启用'); ?></a></li>
+                                    <li><a lang="<?php _e('你确认要禁用这些友链吗?'); ?>" href="<?php $security->index('/action/links-edit?do=prohibit'); ?>"><?php _e('禁用'); ?></a></li>
                                 </ul>
                             </div>
                         </div>
@@ -77,15 +77,15 @@ include 'menu.php';
                                 <?php foreach ($links as $link): ?>
                                 <tr id="lid-<?php echo $link['lid']; ?>">
                                     <td><input type="checkbox" value="<?php echo $link['lid']; ?>" name="lid[]"/></td>
-                                    <td><a href="<?php echo $request->makeUriByRequest('lid=' . $link['lid']); ?>" title="点击编辑"><?php echo $link['name']; ?></a>
+                                    <td><a href="<?php echo $request->makeUriByRequest('lid=' . $link['lid']); ?>" title="<?php _e('点击编辑'); ?>"><?php echo $link['name']; ?></a>
                                     <td><?php echo $link['url']; ?></td>
                                     <td><?php echo $link['sort']; ?></td>
                                     <td><?php
                                         if ($link['image']) {
-                                            echo '<a href="'.$link['image'].'" title="点击放大" target="_blank"><img class="avatar" src="'.$link['image'].'" alt="'.$link['name'].'" width="32" height="32"/></a>';
+                                            echo '<a href="'.$link['image'].'" title="'._t('点击放大').'" target="_blank"><img class="avatar" src="'.$link['image'].'" alt="'.$link['name'].'" width="32" height="32"/></a>';
                                         } else {
                                             $options = Typecho_Widget::widget('Widget_Options');
-                                            $nopic_url = Typecho_Common::url('/usr/plugins/Links/nopic.jpg', $options->siteUrl);
+                                            $nopic_url = Typecho_Common::url('usr/plugins/Links/nopic.png', $options->siteUrl);
                                             echo '<img class="avatar" src="'.$nopic_url.'" alt="NOPIC" width="32" height="32"/>';
                                         }
                                     ?></td>
@@ -125,8 +125,8 @@ $('input[name="email"]').blur(function() {
     var _email = $(this).val();
     var _image = $('input[name="image"]').val();
     if (_email != '' && _image == '') {
-        var k="<?php Helper::options()->pluginUrl(); ?>Links/api/email-logo.php?type=json&email=" + $(this).val();
-        $.get(k,function (result) {
+        var k = "<?php $security->index('/action/links-edit'); ?>";
+        $.post(k, {"do": "email-logo", "type": "json", "email": $(this).val()}, function (result) {
             var k = jQuery.parseJSON(result).url;
             $('input[name="image"]').val(k);
         });
@@ -145,7 +145,7 @@ $('input[name="email"]').blur(function() {
                     ids.push($(this).val());
                 });
 
-                $.post('<?php $options->index('/action/links-edit?do=sort'); ?>',
+                $.post('<?php $security->index('/action/links-edit?do=sort'); ?>',
                     $.param({lid : ids}));
 
                 $('tr', table).each(function (i) {
