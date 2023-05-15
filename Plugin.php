@@ -5,9 +5,12 @@
  * 
  * @package Links
  * @author 懵仙兔兔
- * @version 1.2.5
+ * @version 1.2.6
  * @dependence 14.10.10-*
  * @link https://2dph.com
+ * 
+ * version 1.2.6 at 2023-05-15 by 泽泽社长
+ * 支持主题作者自定义友链 html 结构
  * 
  * version 1.2.5 at 2023-03-27 by 懵仙兔兔
  * 友链添加 noopener 外链属性
@@ -464,8 +467,6 @@ class Links_Plugin implements Typecho_Plugin_Interface
             $pattern = $settings->pattern_img . "\n";
         } elseif ($pattern == 'SHOW_MIX') {
             $pattern = $settings->pattern_mix . "\n";
-        } else {
-            $pattern = $settings->pattern_text . "\n";
         }
         $db = Typecho_Db::get();
         $prefix = $db->getPrefix();
@@ -505,9 +506,9 @@ class Links_Plugin implements Typecho_Plugin_Interface
     }
 
     //输出
-    public static function output($pattern = 'SHOW_TEXT', $links_num = 0, $sort = null, $size = 32)
+    public static function output($pattern = 'SHOW_TEXT', $links_num = 0, $sort = null, $size = 32, $mode = '')
     {
-        return Links_Plugin::output_str('', array($pattern, $links_num, $sort, $size));
+        return Links_Plugin::output_str('', array($pattern, $links_num, $sort, $size, $mode));
     }
 
     /**
