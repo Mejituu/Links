@@ -5,9 +5,12 @@
  * 
  * @package Links
  * @author 懵仙兔兔
- * @version 1.2.6
+ * @version 1.2.7
  * @dependence 14.10.10-*
  * @link https://2dph.com
+ * 
+ * version 1.2.7 at 2024-06-21 by 泽泽社长
+ * 解决php8.2一处报错问题
  * 
  * version 1.2.6 at 2023-05-15 by 泽泽社长
  * 支持主题作者自定义友链 html 结构
@@ -528,7 +531,7 @@ class Links_Plugin implements Typecho_Plugin_Interface
         $text = empty($lastResult) ? $text : $lastResult;
 
         if ($widget instanceof Widget_Archive || $widget instanceof Widget_Abstract_Comments) {
-            return preg_replace_callback("/<links\s*(\d*)\s*(\w*)\s*(\d*)>\s*(.*?)\s*<\/links>/is", array('Links_Plugin', 'parseCallback'), $text);
+            return preg_replace_callback("/<links\s*(\d*)\s*(\w*)\s*(\d*)>\s*(.*?)\s*<\/links>/is", array('Links_Plugin', 'parseCallback'), $text?$text:'');
         } else {
             return $text;
         }
