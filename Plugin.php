@@ -5,9 +5,12 @@
  * 
  * @package Links
  * @author 懵仙兔兔
- * @version 1.2.7
+ * @version 1.2.8
  * @dependence 14.10.10-*
  * @link https://2dph.com
+ * 
+ * version 1.2.8 at 2024-06-24 by Ouroboros
+ * 添加了 Postgres 支持
  * 
  * version 1.2.7 at 2024-06-21 by 泽泽社长
  * 解决php8.2一处报错问题
@@ -272,7 +275,8 @@ class Links_Plugin implements Typecho_Plugin_Interface
         $type = explode('_', $installDb->getAdapterName());
         $type = array_pop($type);
         $prefix = $installDb->getPrefix();
-        $scripts = file_get_contents('usr/plugins/Links/' . $type . '.sql');
+        $scripts = file_get_contents('.' . __TYPECHO_PLUGIN_DIR__. '/Links/' . $type . '.sql');
+        if (!$scripts) return '你的数据库' . $type . '尚不支持, 请提交 issues!';
         $scripts = str_replace('typecho_', $prefix, $scripts);
         $scripts = str_replace('%charset%', 'utf8', $scripts);
         $scripts = explode(';', $scripts);
@@ -287,7 +291,8 @@ class Links_Plugin implements Typecho_Plugin_Interface
         } catch (Typecho_Db_Exception $e) {
             $code = $e->getCode();
             if (('Mysql' == $type && (1050 == $code || '42S01' == $code)) ||
-                ('SQLite' == $type && ('HY000' == $code || 1 == $code))
+                ('SQLite' == $type && ('HY000' == $code || 1 == $code)) ||
+                ('Pgsql' == $type && '42P07' == $code)
             ) {
                 try {
                     $script = 'SELECT `lid`, `name`, `url`, `sort`, `email`, `image`, `description`, `user`, `state`, `order` from `' . $prefix . 'links`';
@@ -296,7 +301,8 @@ class Links_Plugin implements Typecho_Plugin_Interface
                 } catch (Typecho_Db_Exception $e) {
                     $code = $e->getCode();
                     if (('Mysql' == $type && (1054 == $code || '42S22' == $code)) ||
-                        ('SQLite' == $type && ('HY000' == $code || 1 == $code))
+                        ('SQLite' == $type && ('HY000' == $code || 1 == $code)) ||
+                        ('Pgsql' == $type && 42601 == $code)
                     ) {
                         return Links_Plugin::linksUpdate($installDb, $type, $prefix);
                     }
@@ -310,7 +316,7 @@ class Links_Plugin implements Typecho_Plugin_Interface
 
     public static function linksUpdate($installDb, $type, $prefix)
     {
-        $scripts = file_get_contents('usr/plugins/Links/Update_' . $type . '.sql');
+        $scripts = file_get_contents('.' . __TYPECHO_PLUGIN_DIR__. '/Links/Update_' . $type . '.sql');
         $scripts = str_replace('typecho_', $prefix, $scripts);
         $scripts = str_replace('%charset%', 'utf8', $scripts);
         $scripts = explode(';', $scripts);
