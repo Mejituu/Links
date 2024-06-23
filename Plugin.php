@@ -275,7 +275,7 @@ class Links_Plugin implements Typecho_Plugin_Interface
         $type = explode('_', $installDb->getAdapterName());
         $type = array_pop($type);
         $prefix = $installDb->getPrefix();
-        $scripts = file_get_contents(ltrim(__TYPECHO_PLUGIN_DIR__, '/') . '/Links/' . $type . '.sql');
+        $scripts = file_get_contents('.' . __TYPECHO_PLUGIN_DIR__. '/Links/' . $type . '.sql');
         if (!$scripts) return '你的数据库' . $type . '尚不支持, 请提交 issues!';
         $scripts = str_replace('typecho_', $prefix, $scripts);
         $scripts = str_replace('%charset%', 'utf8', $scripts);
@@ -316,7 +316,7 @@ class Links_Plugin implements Typecho_Plugin_Interface
 
     public static function linksUpdate($installDb, $type, $prefix)
     {
-        $scripts = file_get_contents(ltrim(__TYPECHO_PLUGIN_DIR__, '/') . '/Links/Update_' . $type . '.sql');
+        $scripts = file_get_contents('.' . __TYPECHO_PLUGIN_DIR__. '/Links/Update_' . $type . '.sql');
         $scripts = str_replace('typecho_', $prefix, $scripts);
         $scripts = str_replace('%charset%', 'utf8', $scripts);
         $scripts = explode(';', $scripts);
