@@ -5,7 +5,7 @@
  * 
  * @package Links
  * @author 懵仙兔兔
- * @version 1.2.7
+ * @version 1.2.8
  * @dependence 14.10.10-*
  * @link https://2dph.com
  * 
